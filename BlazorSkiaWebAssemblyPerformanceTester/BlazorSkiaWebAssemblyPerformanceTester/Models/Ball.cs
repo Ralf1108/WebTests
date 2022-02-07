@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace BlazorCanvasTest2.Models
+﻿namespace BlazorSkiaWebAssemblyPerformanceTester.Models
 {
     public class Ball
     {

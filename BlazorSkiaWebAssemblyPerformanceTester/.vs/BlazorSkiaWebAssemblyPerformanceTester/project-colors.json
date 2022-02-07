@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "3ebbad61-76c0-455b-acbc-8c93ca4c35e0": {
+      "ProjectGuid": "3ebbad61-76c0-455b-acbc-8c93ca4c35e0",
+      "DisplayName": "BlazorSkiaWebAssemblyPerformanceTester",
+      "ColorIndex": 0
+    }
+  },
+  "NextColorIndex": 1
+}
