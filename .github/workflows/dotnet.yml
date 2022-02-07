@@ -33,6 +33,10 @@ jobs:
       run: dotnet publish BlazorSkiaWebAssemblyPerformanceTester.csproj -c Release -o release --nologo
       working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
       
+      # changes the base-tag in index.html from '/' to 'WebTests' to match GitHub Pages repository subdirectory
+    - name: Change base-tag in index.html from / to BlazorGitHubPagesDemo
+      run: sed -i 's/<base href="\/" \/>/<base href="\/WebTests\/" \/>/g' BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester/release/wwwroot/index.html
+      
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4.2.3
       with:
