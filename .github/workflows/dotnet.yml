@@ -33,9 +33,9 @@ jobs:
       run: dotnet publish BlazorSkiaWebAssemblyPerformanceTester.csproj -c Release -o release --nologo
       working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
       
-    - name: Commit wwwroot to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4.2.3
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: release/wwwroot
+        FOLDER: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester/release/wwwroot
