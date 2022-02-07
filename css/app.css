@@ -69,6 +69,6 @@ a, .btn-link {
 }
 
 .canvas-container canvas {
-    width: 800px;
+    width: 100%;
     height: 600px;
 }
