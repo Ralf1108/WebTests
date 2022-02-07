@@ -1,0 +1,194 @@
+﻿@page "/performance"
+@using BlazorCanvasTest2.Models
+
+<PageTitle>Performance</PageTitle>
+
+<h1>Performance</h1>
+
+@*https://nerocui.com/2022/01/08/when-blazor-meets-skiasharp/*@
+@*https://swharden.com/blog/2021-01-07-blazor-canvas-animated-graphics/*@
+
+<button class="btn btn-primary" @onclick="SwitchEngine">SwitchEngine</button>
+<button class="btn btn-primary" @onclick="AddBalls">Add balls</button>
+<button class="btn btn-primary" @onclick="Invalidate">Invalidate</button>
+<button class="btn btn-primary" @onclick="ToggleRenderloop">Toggle renderloop</button>
+<h1>Balls: @_ballCount</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col border rounded p-2 canvas-container">
+            @if (@_useOpenGl)
+            {
+                <SKGLView 
+                    @ref="skiaViewGl"
+                    @onpointerdown="OnPointerDown"
+                    @onpointermove="OnPointerMove"
+                    @onpointerup="OnPointerUp"
+                    IgnorePixelScaling="true"
+                    EnableRenderLoop=@_renderLoop
+                    OnPaintSurface="OnPaintSurface"/>
+            }
+            else
+            {
+                <SKCanvasView
+                    @ref="skiaView"
+                    @onpointerdown="OnPointerDown"
+                    @onpointermove="OnPointerMove"
+                    @onpointerup="OnPointerUp"
+                    IgnorePixelScaling="true"
+                    EnableRenderLoop=@_renderLoop
+                    OnPaintSurface="OnPaintSurface2"/>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private SKCanvasView skiaView;
+    private SKGLView skiaViewGl;
+
+    private string backend;
+    private float _fps;
+    private float _ballCount;
+
+    private int tickIndex;
+    private long tickSum;
+    private long[] tickList = new long[100];
+    private long lastTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+    private Field BallField = new();
+    private bool _useOpenGl = true;
+    private float offsetX;
+    private float offsetY;
+    private bool _leftButtonPressed;
+    private bool _renderLoop = true;
+
+    protected override void OnInitialized()
+    {
+        BallField.Resize(800, 600);
+        AddBalls();
+
+        base.OnInitialized();
+    }
+
+    void AddBalls()
+    {
+        var increment = 100;
+        _ballCount += increment;
+        BallField.AddRandomBalls(increment);
+    }
+
+    void OnPaintSurface(SKPaintGLSurfaceEventArgs e)
+    {
+        Draw(e.Info, e.Surface);
+    }
+
+    float GetCurrentFPS()
+    {
+        var newTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        var delta = newTick - lastTick;
+        lastTick = newTick;
+
+        tickSum -= tickList[tickIndex];
+        tickSum += delta;
+        tickList[tickIndex] = delta;
+
+        if (++tickIndex == tickList.Length)
+            tickIndex = 0;
+
+        return (float)(1000.0 / ((double)tickSum / tickList.Length));
+    }
+
+    private void OnPaintSurface2(SKPaintSurfaceEventArgs e)
+    {
+        Draw(e.Info, e.Surface);
+    }
+
+    private void Draw(SKImageInfo info, SKSurface surface)
+    {
+        // the the canvas and properties
+        var canvas = surface.Canvas;
+
+        // make sure the canvas is blank
+        canvas.Clear(SKColors.Blue);
+        canvas.Translate(offsetX, offsetY);
+
+        using var paint = new SKPaint
+        {
+            IsAntialias = true,
+            StrokeWidth = 5f,
+            ////StrokeCap = SKStrokeCap.Round,
+            //TextAlign = SKTextAlign.Center,
+            TextSize = 24,
+        };
+
+        var surfaceSize = info.Size;
+        var clockSize = Math.Min(surfaceSize.Width, surfaceSize.Height) * 0.4f;
+        var center = new SKPoint(surfaceSize.Width / 2f, surfaceSize.Height / 2f);
+        var now = DateTime.Now;
+        _fps = GetCurrentFPS();
+
+        // draw the balls
+        BallField.StepForward();
+
+        paint.Color = SKColor.Parse("#003366");
+        canvas.DrawRect(0, 0, BallField.Width, BallField.Height, paint);
+
+
+
+        paint.StrokeWidth = 2;
+        paint.Style = SKPaintStyle.StrokeAndFill;
+
+        paint.Color = SKColor.Parse("#00FFFF");
+        foreach (var ball in BallField.Balls)
+        {
+            canvas.DrawCircle(new SKPoint(ball.X, ball.Y), ball.R, paint);
+        }
+
+        // draw the fps counter
+        paint.Color = SKColor.Parse("#FF0000");
+        canvas.DrawText($"{_fps:00.00}fps - openGL: {_useOpenGl}", 0, 20, paint);
+    }
+
+    private void SwitchEngine()
+    {
+        _useOpenGl = !_useOpenGl;
+        StateHasChanged();
+    }
+
+    private void OnPointerMove(PointerEventArgs e)
+    {
+        if (_leftButtonPressed)
+        {
+            offsetX = (float)e.OffsetX;
+            offsetY = (float)e.OffsetY;
+        }
+
+        Invalidate();
+    }
+
+    private void OnPointerDown(PointerEventArgs e)
+    {
+        if (e.Button == 0)
+            _leftButtonPressed = true;
+    }
+
+    private void OnPointerUp(PointerEventArgs e)
+    {
+        if (e.Button == 0)
+            _leftButtonPressed = false;
+    }
+
+    private void Invalidate()
+    {
+        if (_useOpenGl)
+            skiaViewGl.Invalidate();
+        else
+            skiaView.Invalidate();
+    }
+
+    private void ToggleRenderloop()
+    {
+        _renderLoop = !_renderLoop;
+    }
+}
