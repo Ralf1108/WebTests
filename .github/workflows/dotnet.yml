@@ -18,6 +18,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       working-directory: BlazorSkiaWebAssemblyPerformanceTester
+      
+    - name: Install wasm tools
+      run: dotnet workload install wasm-tools
+      working-directory: BlazorSkiaWebAssemblyPerformanceTester
+      
 #- name: Build
 #      run: dotnet build --no-restore
 #    - name: Test
