@@ -17,6 +17,7 @@ jobs:
         dotnet-version: '6.0.x'
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: BlazorSkiaWebAssemblyPerformanceTester
 #- name: Build
 #      run: dotnet build --no-restore
 #    - name: Test
@@ -25,6 +26,7 @@ jobs:
      # publishes Blazor project to the release-folder
     - name: Publish .NET Core Project
       run: dotnet publish BlazorSkiaWebAssemblyPerformanceTester.csproj -c Release -o release --nologo
+      working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
       
     - name: Commit wwwroot to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
