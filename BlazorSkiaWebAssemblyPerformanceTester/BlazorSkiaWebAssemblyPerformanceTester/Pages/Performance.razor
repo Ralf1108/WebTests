@@ -11,12 +11,13 @@
 @*https://github.com/pwa-builder/pwa-install*@
 @*https://swimburger.net/blog/dotnet/how-to-deploy-aspnet-blazor-webassembly-to-github-pages*@
 
-<button class="btn btn-primary" @onclick="Invalidate">Invalidate</button>
-<button class="btn btn-primary" @onclick="ToggleRenderLoop">Toggle renderloop</button>
-
 <br/>
 <label>OpenGL enabled: @_useOpenGl</label>
 <button class="btn btn-primary" @onclick="SwitchEngine">Switch engine</button>
+
+<br/>
+<label>Renderloop enabled: @_renderLoop</label>
+<button class="btn btn-primary" @onclick="ToggleRenderLoop">Toggle renderloop</button>
 
 <br/>
 <label>Balls:</label>
