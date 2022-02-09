@@ -35,8 +35,6 @@
             @if (@_useOpenGl)
             {
                 <SKGLView
-                    width="400px"
-                    height="400px"
                     @ref="_skiaViewGl"
                     @onpointerdown="OnPointerDown"
                     @onpointermove="OnPointerMove"
@@ -48,8 +46,6 @@
             else
             {
                 <SKCanvasView
-                    width="400px"
-                    height="400px"
                     @ref="_skiaView"
                     @onpointerdown="OnPointerDown"
                     @onpointermove="OnPointerMove"
