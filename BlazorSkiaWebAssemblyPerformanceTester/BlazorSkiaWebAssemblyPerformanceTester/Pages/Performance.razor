@@ -24,12 +24,19 @@
 <input placeholder="Enter ball count" value="@_ballField.Count.ToString()" @onchange="@OnBallCountChanged" />
 <button class="btn btn-primary" @onclick="AddBalls">Add 500 balls</button>
 
+<br/>
+<label>Source code:</label>
+<a href="https://github.com/Ralf1108/WebTests/tree/main/BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester">GitHub</a>
+
+
 <div class="container">
     <div class="row">
         <div class="col border rounded p-2 canvas-container" >
             @if (@_useOpenGl)
             {
-                <SKGLView 
+                <SKGLView
+                    width="400px"
+                    height="400px"
                     @ref="_skiaViewGl"
                     @onpointerdown="OnPointerDown"
                     @onpointermove="OnPointerMove"
@@ -41,6 +48,8 @@
             else
             {
                 <SKCanvasView
+                    width="400px"
+                    height="400px"
                     @ref="_skiaView"
                     @onpointerdown="OnPointerDown"
                     @onpointermove="OnPointerMove"
@@ -52,9 +61,6 @@
         </div>
     </div>
 </div>
-
-<label>Source code:</label>
-<a href="https://github.com/Ralf1108/WebTests/tree/main/BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester">GitHub</a>
 
 @code {
 #pragma warning disable CS8618
