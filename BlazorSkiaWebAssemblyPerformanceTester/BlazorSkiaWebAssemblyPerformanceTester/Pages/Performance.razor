@@ -23,6 +23,10 @@
 <button class="btn btn-primary" @onclick="ToggleRenderLoop">Toggle renderloop</button>
 
 <br/>
+<label>Shader enabled: @_useShader</label>
+<button class="btn btn-primary" @onclick="ToggleShader">Toggle shader</button>
+
+<br/>
 <label>Use Path enabled: @_usePathRendering</label>
 <button class="btn btn-primary" @onclick="TogglePathRendering">Toggle PathRendering</button>
 <button class="btn btn-primary" @onclick="SimplifyPath">Simplify Path</button>
@@ -77,6 +81,7 @@
 
     private bool _useOpenGl = true;
     private bool _useRenderLoop = true;
+    private bool _useShader;
     private bool _usePathRendering;
 
     private float _moveOffsetX;
@@ -91,7 +96,7 @@
     private readonly long[] _tickList = new long[25];
     private long _lastTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-    private SKPath _ballPath;
+    private SKPath _ballPath = new();
     private int _pointCount;
     private int _verbCount;
 
@@ -223,9 +228,12 @@
         paint.Color = SKColor.Parse("#00FFFF");
 
     // shader
-        var points = new SKPoint[] { new(0, 0), new(256, 256) };
-        var colors = new SKColor[] { SKColors.Blue, SKColors.Yellow };
-        paint.Shader = SKShader.CreateLinearGradient(points[0], points[1], colors, SKShaderTileMode.Clamp);
+        if (_useShader)
+        {
+            var points = new SKPoint[] { new(0, 0), new(256, 256) };
+            var colors = new SKColor[] { SKColors.Blue, SKColors.Yellow };
+            paint.Shader = SKShader.CreateLinearGradient(points[0], points[1], colors, SKShaderTileMode.Clamp);
+        }
 
         if (_usePathRendering)
         {
@@ -239,6 +247,7 @@
         }
 
     // draw the fps counter
+        paint.Shader = null;
         _fps = GetCurrentFps();
         paint.Color = SKColor.Parse("#FF0000");
         canvas.DrawText($"{_fps:00.00}fps", 0, 20, paint);
@@ -261,6 +270,11 @@
     private void ToggleRenderLoop()
     {
         _useRenderLoop = !_useRenderLoop;
+    }
+    
+    private void ToggleShader()
+    {
+        _useShader = !_useShader;
     }
     
     private void TogglePathRendering()
