@@ -16,8 +16,15 @@
 <button class="btn btn-primary" @onclick="SwitchEngine">Switch engine</button>
 
 <br/>
-<label>Renderloop enabled: @_renderLoop</label>
+<label>Renderloop enabled: @_useRenderLoop</label>
 <button class="btn btn-primary" @onclick="ToggleRenderLoop">Toggle renderloop</button>
+
+<br/>
+<label>Use Path enabled: @_usePathRendering</label>
+<button class="btn btn-primary" @onclick="TogglePathRendering">Toggle PathRendering</button>
+<button class="btn btn-primary" @onclick="SimplifyPath">Simplify Path</button>
+<label>Points: @_pointCount</label>
+<label>Verbs: @_verbCount</label>
 
 <br/>
 <label>Balls:</label>
@@ -40,7 +47,7 @@
                     @onpointermove="OnPointerMove"
                     @onpointerup="OnPointerUp"
                     IgnorePixelScaling="true"
-                    EnableRenderLoop=@_renderLoop
+                    EnableRenderLoop=@_useRenderLoop
                     OnPaintSurface="OnPaintSurface"/>
             }
             else
@@ -51,7 +58,7 @@
                     @onpointermove="OnPointerMove"
                     @onpointerup="OnPointerUp"
                     IgnorePixelScaling="true"
-                    EnableRenderLoop=@_renderLoop
+                    EnableRenderLoop=@_useRenderLoop
                     OnPaintSurface="OnPaintSurface2"/>
             }
         </div>
@@ -65,7 +72,8 @@
 #pragma warning restore CS8618
 
     private bool _useOpenGl = true;
-    private bool _renderLoop = true;
+    private bool _useRenderLoop = true;
+    private bool _usePathRendering;
 
     private float _moveOffsetX;
     private float _moveOffsetY;
@@ -76,12 +84,16 @@
     private float _fps;
     private int _tickIndex;
     private long _tickSum;
-    private readonly long[] _tickList = new long[100];
+    private readonly long[] _tickList = new long[25];
     private long _lastTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+    private SKPath _ballPath;
+    private int _pointCount;
+    private int _verbCount;
 
     protected override void OnInitialized()
     {
-        _ballField.Resize(100, 100);
+        _ballField.Resize(400, 400);
         AddBalls();
 
         base.OnInitialized();
@@ -132,12 +144,29 @@
         else
             _ballField.RemoveRandomBalls(-diff);
 
+        UpdateBallPath();
         StateHasChanged();
     }
 
     private void AddBalls()
     {
         _ballField.AddRandomBalls(500);
+        UpdateBallPath();
+    }
+
+    private void UpdateBallPath()
+    {
+        var path = new SKPath();
+        foreach (var ball in _ballField.Balls)
+        {
+            var location = new SKPoint(ball.X, ball.Y);
+            path.MoveTo(location);
+            var box = SKRect.Create(location, new SKSize(ball.R, ball.R));
+            path.AddOval(box);
+        }
+
+        _ballPath = path;
+        UpdatePathDetails();
     }
 
     private void Draw(SKImageInfo info, SKSurface surface)
@@ -156,11 +185,9 @@
         {
             IsAntialias = true,
             StrokeWidth = 5f,
-    ////StrokeCap = SKStrokeCap.Round,
-    //TextAlign = SKTextAlign.Center,
             TextSize = 24,
         };
-
+        
     // draw the balls
         paint.Color = SKColor.Parse("#003366");
         canvas.DrawRect(0, 0, _ballField.Width, _ballField.Height, paint);
@@ -168,8 +195,22 @@
         paint.StrokeWidth = 2;
         paint.Style = SKPaintStyle.StrokeAndFill;
         paint.Color = SKColor.Parse("#00FFFF");
-        foreach (var ball in _ballField.Balls)
-            canvas.DrawCircle(new SKPoint(ball.X, ball.Y), ball.R, paint);
+
+    // shader
+        var points = new SKPoint[] { new(0, 0), new(256, 256) };
+        var colors = new SKColor[] { SKColors.Blue, SKColors.Yellow };
+        paint.Shader = SKShader.CreateLinearGradient(points[0], points[1], colors, SKShaderTileMode.Clamp);
+
+        if (_usePathRendering)
+        {
+            // note: path rendering doesn't have movement
+            canvas.DrawPath(_ballPath, paint);
+        }
+        else
+        {
+            foreach (var ball in _ballField.Balls)
+                canvas.DrawCircle(new SKPoint(ball.X, ball.Y), ball.R, paint);
+        }
 
     // draw the fps counter
         _fps = GetCurrentFps();
@@ -193,7 +234,24 @@
 
     private void ToggleRenderLoop()
     {
-        _renderLoop = !_renderLoop;
+        _useRenderLoop = !_useRenderLoop;
+    }
+    
+    private void TogglePathRendering()
+    {
+        _usePathRendering = !_usePathRendering;
+    }
+    
+    private void SimplifyPath()
+    {
+        _ballPath = _ballPath.Simplify();
+        UpdatePathDetails();
+    }
+
+    private void UpdatePathDetails()
+    {
+        _pointCount = _ballPath.PointCount;
+        _verbCount = _ballPath.VerbCount;
     }
 
     private float GetCurrentFps()
