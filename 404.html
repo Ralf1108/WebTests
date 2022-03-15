@@ -19,7 +19,21 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <!--@*download file*@
+    @*from https://stackoverflow.com/questions/52683706/how-can-one-generate-and-save-a-file-client-side-using-blazor*@-->
+    <script type="text/javascript">
+        window.downloadFile = function (filename, bytesBase64) {
+                var link = document.createElement('a');
+                link.download = filename;
+                link.href = "data:application/octet-stream;base64," + bytesBase64;
+                document.body.appendChild(link); // Needed for Firefox
+                link.click();
+                document.body.removeChild(link);
+            };
+    </script>
 </body>
 
 </html>
