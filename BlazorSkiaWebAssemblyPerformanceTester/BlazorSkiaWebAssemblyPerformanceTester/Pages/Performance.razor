@@ -1,4 +1,7 @@
 ﻿@page "/performance"
+
+@inject IJSRuntime _jsRuntime
+
 @using BlazorSkiaWebAssemblyPerformanceTester.Models
 
 <PageTitle>Performance test</PageTitle>
@@ -30,6 +33,7 @@
 <label>Balls:</label>
 <input placeholder="Enter ball count" value="@_ballField.Count.ToString()" @onchange="@OnBallCountChanged" />
 <button class="btn btn-primary" @onclick="AddBalls">Add 500 balls</button>
+<button class="btn btn-primary" @onclick="ExportToPdf">Export to PDF</button>
 
 <br/>
 <label>Source code:</label>
@@ -101,12 +105,12 @@
 
     private void OnPaintSurface2(SKPaintSurfaceEventArgs e)
     {
-        Draw(e.Info, e.Surface);
+        DrawOnSurface(e.Info, e.Surface);
     }
 
     private void OnPaintSurface(SKPaintGLSurfaceEventArgs e)
     {
-        Draw(e.Info, e.Surface);
+        DrawOnSurface(e.Info, e.Surface);
     }
 
     private void OnPointerMove(PointerEventArgs e)
@@ -148,6 +152,23 @@
         StateHasChanged();
     }
 
+    private async void ExportToPdf()
+    {
+        var metadata = new SKDocumentPdfMetadata
+        {
+            Title = $"TestPdf - {_ballField.Count}"
+        };
+
+        await using var ms = new MemoryStream();
+        var pdf = SKDocument.CreatePdf(ms, metadata);
+        var canvas = pdf.BeginPage(_ballField.Width, _ballField.Height);
+        DrawOnCanvas(canvas);
+        pdf.EndPage();
+        pdf.Close();
+
+        await DownloadHelper.SaveAs(_jsRuntime, "export.pdf", ms.GetBuffer());
+    }
+
     private void AddBalls()
     {
         _ballField.AddRandomBalls(500);
@@ -169,7 +190,7 @@
         UpdatePathDetails();
     }
 
-    private void Draw(SKImageInfo info, SKSurface surface)
+    private void DrawOnSurface(SKImageInfo info, SKSurface surface)
     {
         _ballField.Resize(info.Width, info.Height);
         _ballField.StepForward();
@@ -177,6 +198,11 @@
     // the canvas and properties
         var canvas = surface.Canvas;
 
+        DrawOnCanvas(canvas);
+    }
+
+    private void DrawOnCanvas(SKCanvas canvas)
+    {
     // make sure the canvas is blank
         canvas.Clear(SKColors.Blue);
         canvas.Translate(_moveOffsetX, _moveOffsetY);
@@ -187,7 +213,7 @@
             StrokeWidth = 5f,
             TextSize = 24,
         };
-        
+
     // draw the balls
         paint.Color = SKColor.Parse("#003366");
         canvas.DrawRect(0, 0, _ballField.Width, _ballField.Height, paint);
@@ -203,7 +229,7 @@
 
         if (_usePathRendering)
         {
-            // note: path rendering doesn't have movement
+    // note: path rendering doesn't have movement
             canvas.DrawPath(_ballPath, paint);
         }
         else
@@ -269,5 +295,4 @@
 
         return (float)(1000.0 / ((double)_tickSum / _tickList.Length));
     }
-
 }
