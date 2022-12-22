@@ -32,6 +32,11 @@ jobs:
     - name: Publish .NET Core Project
       run: dotnet publish BlazorSkiaWebAssemblyPerformanceTester.csproj -c Release -o release --nologo
       working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
+    
+      # copy wwwroot to net7 subdirectory
+    - name: Copy wwwroot to net7 subdirectory
+      run: mv release/wwwroot release/wwwroot/net7
+      working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
       
       # changes the base-tag in index.html from '/' to 'WebTests' to match GitHub Pages repository subdirectory
     - name: Change base-tag in index.html from / to BlazorGitHubPagesDemo
