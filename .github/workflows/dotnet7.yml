@@ -35,7 +35,12 @@ jobs:
     
       # copy wwwroot to net7 subdirectory
     - name: Copy wwwroot to net7 subdirectory
-      run: cp -r release/wwwroot release/wwwroot/net7
+      run: cp -r release/wwwroot release/net7
+      working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
+      
+      # mv net7 subdirectory
+    - name: Move net7 subdirectory
+      run: mv release/net7 release/wwwroot/net7
       working-directory: BlazorSkiaWebAssemblyPerformanceTester/BlazorSkiaWebAssemblyPerformanceTester
       
       # changes the base-tag in index.html from '/' to 'WebTests' to match GitHub Pages repository subdirectory
