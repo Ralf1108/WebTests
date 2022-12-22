@@ -3,8 +3,10 @@
 @inject IJSRuntime _jsRuntime
 
 @using BlazorSkiaWebAssemblyPerformanceTester.Models
+@using SkiaSharp
+@using SkiaSharp.Views.Blazor
 
-<PageTitle>Performance test</PageTitle>
+<PageTitle>Performance test .NET7</PageTitle>
 
 <h1>Performance test</h1>
 <h2>SkiaSharp WebAssembly (Software / OpenGL)</h2>
@@ -75,8 +77,8 @@
 
 @code {
 #pragma warning disable CS8618
-    private SKCanvasView _skiaView;
-    private SKGLView _skiaViewGl;
+    private SKCanvasView? _skiaView;
+    private SKGLView? _skiaViewGl;
 #pragma warning restore CS8618
 
     private bool _useOpenGl = true;
@@ -262,9 +264,9 @@
     private void Invalidate()
     {
         if (_useOpenGl)
-            _skiaViewGl.Invalidate();
+            _skiaViewGl!.Invalidate();
         else
-            _skiaView.Invalidate();
+            _skiaView!.Invalidate();
     }
 
     private void ToggleRenderLoop()

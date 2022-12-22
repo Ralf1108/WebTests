@@ -3,17 +3,27 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:45166",
-      "sslPort": 44367
+      "applicationUrl": "http://localhost:6989",
+      "sslPort": 44366
     }
   },
   "profiles": {
-    "BlazorSkiaWebAssemblyPerformanceTester": {
+    "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
-      "applicationUrl": "https://localhost:7205;http://localhost:5205",
+      "applicationUrl": "http://localhost:5065",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
+      "applicationUrl": "https://localhost:7223;http://localhost:5065",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
